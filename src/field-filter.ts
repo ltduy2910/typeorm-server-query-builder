@@ -7,7 +7,8 @@ import {
   Like,
   MoreThan,
   MoreThanOrEqual,
-  Not
+  Not,
+  Raw
 } from 'typeorm';
 import { AbstractFilter } from './filter';
 import { LookupFilter, Operator } from './lookup.enum';
@@ -38,7 +39,11 @@ export class FieldFilter extends AbstractFilter {
         if (this.prop !== Operator.OR) queryToAdd = { [this.prop]: this.value };
         break;
       case LookupFilter.CONTAINS:
-        queryToAdd = { [this.prop]: Like(`%${this.value}%`) };
+        queryToAdd = {
+          [this.prop]: Raw(
+            alias => `LOWER(${alias}) Like '%${this.value.toLowerCase()}%'`
+          )
+        };
         break;
       case LookupFilter.STARTS_WITH:
         queryToAdd = { [this.prop]: Like(`${this.value}%`) };
